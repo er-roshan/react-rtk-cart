@@ -1,0 +1,65 @@
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+
+export const STATUSES = Object.freeze({
+	IDLE: 'idle',
+	ERROR: 'error',
+	LOADING: 'loading',
+});
+
+const initialState = {
+	status: STATUSES.IDLE,
+	data: [],
+};
+
+const productSlice = createSlice({
+	name: 'product',
+	initialState,
+	reducers: {
+		// setProducts(state, action) {
+		// 	// DO not call api inside reducers
+		// 	state.data = action.payload;
+		// },
+		// setStatus(state, action) {
+		// 	// DO not call api inside reducers
+		// 	state.status = action.payload;
+		// },
+	},
+	extraReducers: (builder) => {
+		builder
+			.addCase(fetchProducts.pending, (state, action) => {
+				state.status = STATUSES.LOADING;
+			})
+			.addCase(fetchProducts.fulfilled, (state, action) => {
+				state.data = action.payload;
+				state.status = STATUSES.IDLE;
+			})
+			.addCase(fetchProducts.rejected, (state, action) => {
+				state.status = STATUSES.ERROR;
+			});
+	},
+});
+
+export const { setProducts, setStatus } = productSlice.actions;
+export default productSlice.reducer;
+
+// THunks
+// export function fetchProducts() {
+// 	return async function fetchProductThunk(dispatch, getState) {
+// 		dispatch(setStatus(STATUSES.LOADING));
+// 		try {
+// 			const res = await fetch('https://fakestoreapi.com/products');
+// 			const data = await res.json();
+// 			dispatch(setProducts(data));
+// 			dispatch(setStatus(STATUSES.IDLE));
+// 		} catch (error) {
+// 			console.log(error);
+// 			dispatch(setStatus(STATUSES.ERROR));
+// 		}
+// 	};
+// }
+
+export const fetchProducts = createAsyncThunk('products/fetch', async () => {
+	const res = await fetch('https://fakestoreapi.com/products');
+	const data = await res.json();
+	return data;
+});
